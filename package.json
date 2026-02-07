@@ -1,0 +1,38 @@
+{
+  "name": "elacare-web",
+  "version": "1.0.0",
+  "description": "Smart Farming Tool for Cardamom Cultivation - Full Stack Application",
+  "private": true,
+  "scripts": {
+    "frontend:install": "cd frontend && npm install",
+    "backend:install": "cd backend && npm install",
+    "frontend:dev": "cd frontend && npm start",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:build": "cd frontend && npm build",
+    "backend:start": "cd backend && npm start",
+    "setup": "npm run frontend:install && npm run backend:install && echo 'Setup complete! See QUICKSTART.md'",
+    "dev": "echo 'Run these in separate terminals: npm run frontend:dev && npm run backend:dev'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/elacare.git"
+  },
+  "keywords": [
+    "farming",
+    "agriculture",
+    "cardamom",
+    "IoT",
+    "ESP32",
+    "sensor-dashboard",
+    "smart-farming",
+    "react",
+    "firebase",
+    "nodejs"
+  ],
+  "author": "Your Name",
+  "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
