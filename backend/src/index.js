@@ -26,14 +26,14 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-// Import routes
-import authRoutes from "./routes/auth.js";
-import sensorRoutes from "./routes/sensors.js";
-import esp32Routes from "./routes/esp32.js";
+// Import routes dynamically after Firebase initialization
+const authRoutes = await import("./routes/auth.js");
+const sensorRoutes = await import("./routes/sensors.js");
+const esp32Routes = await import("./routes/esp32.js");
 
-app.use("/api/auth", authRoutes);
-app.use("/api/sensors", sensorRoutes);
-app.use("/api/esp32", esp32Routes);
+app.use("/api/auth", authRoutes.default);
+app.use("/api/sensors", sensorRoutes.default);
+app.use("/api/esp32", esp32Routes.default);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

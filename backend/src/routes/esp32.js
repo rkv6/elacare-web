@@ -1,5 +1,5 @@
 import express from "express";
-import { db } from "../firebase.js";
+import { getDb } from "../firebase.js";
 import { Timestamp } from "firebase-admin/firestore";
 
 const router = express.Router();
@@ -18,6 +18,7 @@ const validateESP32Key = (req, res, next) => {
 // Receive sensor data from ESP32
 router.post("/data", validateESP32Key, async (req, res) => {
   try {
+    const db = getDb();
     const { farmId, nitrogen, phosphorus, potassium, ph, boron, temperature, humidity } = req.body;
 
     if (!farmId) {
@@ -61,6 +62,7 @@ router.post("/data", validateESP32Key, async (req, res) => {
 // Get farm configuration for ESP32
 router.get("/config/:farmId", validateESP32Key, async (req, res) => {
   try {
+    const db = getDb();
     const { farmId } = req.params;
 
     const farmDoc = await db.collection("farms").doc(farmId).get();
@@ -94,6 +96,7 @@ router.get("/config/:farmId", validateESP32Key, async (req, res) => {
 // Get latest sensor reading for ESP32 validation
 router.get("/latest/:farmId", validateESP32Key, async (req, res) => {
   try {
+    const db = getDb();
     const { farmId } = req.params;
 
     const sensorRef = db.collection("farms").doc(farmId).collection("sensors").doc("current");
@@ -112,6 +115,7 @@ router.get("/latest/:farmId", validateESP32Key, async (req, res) => {
 // Webhook for sensor alerts
 router.post("/alert", validateESP32Key, async (req, res) => {
   try {
+    const db = getDb();
     const { farmId, alertType, message, severity } = req.body;
 
     if (!farmId || !alertType) {

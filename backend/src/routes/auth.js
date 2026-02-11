@@ -1,5 +1,5 @@
 import express from "express";
-import { auth, db } from "../firebase.js";
+import { getAuth, getDb } from "../firebase.js";
 
 const router = express.Router();
 
@@ -17,6 +17,7 @@ router.post("/verify", async (req, res) => {
       return res.status(400).json({ error: "Token is required" });
     }
 
+    const auth = getAuth();
     const decodedToken = await auth.verifyIdToken(token);
 
     res.json({
@@ -40,6 +41,9 @@ router.post("/set-farm-id", async (req, res) => {
     if (!uid || !farmId) {
       return res.status(400).json({ error: "uid and farmId are required" });
     }
+
+    const auth = getAuth();
+    const db = getDb();
 
     // Verify the user exists
     const user = await auth.getUser(uid);
@@ -72,6 +76,9 @@ router.post("/set-farm-id", async (req, res) => {
 router.get("/user/:uid", async (req, res) => {
   try {
     const { uid } = req.params;
+
+    const auth = getAuth();
+    const db = getDb();
 
     const user = await auth.getUser(uid);
     const userDoc = await db.collection("users").doc(uid).get();
