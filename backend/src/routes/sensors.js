@@ -1,5 +1,5 @@
 import express from "express";
-import { db, authenticateUser } from "../firebase.js";
+import { getDb, authenticateUser } from "../firebase.js";
 import { Timestamp } from "firebase-admin/firestore";
 
 const router = express.Router();
@@ -7,6 +7,7 @@ const router = express.Router();
 // Get current sensor data
 router.get("/current", authenticateUser, async (req, res) => {
   try {
+    const db = getDb();
     const sensorRef = db.collection("farms").doc(req.userId).collection("sensors").doc("current");
     const sensorSnap = await sensorRef.get();
 
@@ -31,6 +32,7 @@ router.get("/current", authenticateUser, async (req, res) => {
 // Get historical sensor data
 router.get("/history", authenticateUser, async (req, res) => {
   try {
+    const db = getDb();
     const { startDate, endDate, limit = 100 } = req.query;
 
     let query = db
@@ -63,6 +65,7 @@ router.get("/history", authenticateUser, async (req, res) => {
 // Post sensor data (for testing)
 router.post("/test", authenticateUser, async (req, res) => {
   try {
+    const db = getDb();
     const { nitrogen, phosphorus, potassium, ph, boron } = req.body;
 
     const sensorRef = db.collection("farms").doc(req.userId).collection("sensors").doc("current");

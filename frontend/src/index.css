@@ -1,35 +1,198 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  :root {
+    /* Lab-style color palette */
+    --bg-primary: #ffffff;
+    --bg-secondary: #fafafa;
+    --bg-accent: #f8f9fa;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --border-light: #e5e7eb;
+    --border-default: #d1d5db;
+    --accent-orange: #ff4500;
+    --accent-red: #dc2626;
+    --accent-dark: #1a1a1a;
+    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color-scheme: light;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  input,
+  textarea,
+  select {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--accent-orange);
+    box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+  }
+
+  button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
 }
 
-html,
-body {
-  font-family: "Inter", sans-serif;
-  background-color: #f3f4f6;
+@layer components {
+  /* Lab-style typography */
+  .lab-heading {
+    font-weight: 800;
+    font-size: 3.5rem;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+  }
+
+  .lab-subheading {
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+
+  .lab-body {
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Orange accent blocks */
+  .accent-block {
+    background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-red) 100%);
+    border-radius: 8px;
+  }
+
+  /* Clean button styles */
+  .lab-button {
+    background: var(--accent-dark);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .lab-button:hover {
+    background: #2a2a2a;
+    transform: translateY(-1px);
+  }
+
+  .lab-button-outline {
+    background: transparent;
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid var(--border-default);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .lab-button-outline:hover {
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+  }
+
+  /* Image placeholder styles */
+  .image-placeholder {
+    background: var(--bg-accent);
+    border: 2px dashed var(--border-default);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* Card styles */
+  .lab-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+    transition: all 0.2s ease;
+  }
+
+  .lab-card:hover {
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+  }
 }
 
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer utilities {
+  .text-lab-primary {
+    color: var(--text-primary);
+  }
+  
+  .text-lab-secondary {
+    color: var(--text-secondary);
+  }
+  
+  .text-lab-muted {
+    color: var(--text-muted);
+  }
+  
+  .bg-lab-primary {
+    background-color: var(--bg-primary);
+  }
+  
+  .bg-lab-secondary {
+    background-color: var(--bg-secondary);
+  }
 }
 
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
 
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-::selection {
-  background-color: #064e3b;
-  color: white;
-}

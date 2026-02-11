@@ -1,11 +1,11 @@
 import admin from "firebase-admin";
 
-export const db = admin.firestore();
-export const auth = admin.auth();
+export const getDb = () => admin.firestore();
+export const getAuth = () => admin.auth();
 
 export const verifyToken = async (token) => {
   try {
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await getAuth().verifyIdToken(token);
     return decodedToken;
   } catch (error) {
     throw new Error("Invalid token");

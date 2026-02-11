@@ -1,172 +1,202 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { db } from "../firebase";
-import { collection, query, where, onSnapshot, doc, getDoc } from "firebase/firestore";
-import { LogOut, Leaf, AlertCircle, TrendingUp } from "lucide-react";
-import SensorCard from "../components/SensorCard";
-import FertilizerAdvice from "../components/FertilizerAdvice";
-import Navbar from "../components/Navbar";
+import React, { useState } from 'react';
+import Navbar from '../components/Navbar';
+import NitrogenCard from '../components/NitrogenCard';
+import pHGauge from '../components/pHGauge';
+import BoronGauge from '../components/BoronGauge';
+import HistoryChart from '../components/HistoryChart';
+import RemedyPanel from '../components/RemedyPanel';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function Dashboard() {
-  const [sensorData, setSensorData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  // Mock sensor data - replace with real API calls
+  const [sensorData, setSensorData] = useState({
+    nitrogen: 52.5,
+    ph: 6.8,
+    boron: 2.2,
+    temperature: 28,
+    moisture: 65,
+    lastUpdate: new Date().toLocaleString()
+  });
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
+  const [loading, setLoading] = useState(false);
 
+  const handleRefresh = async () => {
+    setLoading(true);
     try {
-      // Real-time listener for sensor data from ESP32
-      const sensorRef = doc(db, "farms", user.uid, "sensors", "current");
-      
-      const unsubscribe = onSnapshot(sensorRef, (doc) => {
-        if (doc.exists()) {
-          setSensorData(doc.data());
-        } else {
-          // Use mock data for demo
-          setSensorData({
-            nitrogen: 45,
-            phosphorus: 35,
-            potassium: 120,
-            ph: 6.8,
-            boron: 2.1,
-            lastUpdate: new Date().toISOString(),
-          });
-        }
+      // Replace with actual API call to backend
+      // const response = await fetch('/api/sensors/current');
+      // const data = await response.json();
+      // setSensorData(data);
+
+      // For now, simulate API call
+      setTimeout(() => {
+        setSensorData(prev => ({
+          ...prev,
+          lastUpdate: new Date().toLocaleString()
+        }));
         setLoading(false);
-      });
-
-      return () => unsubscribe();
-    } catch (err) {
-      console.error("Error listening to sensor data:", err);
-      setError("Failed to load sensor data");
+      }, 1000);
+    } catch (error) {
+      console.error('Error refreshing sensor data:', error);
       setLoading(false);
-    }
-  }, [user, navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (err) {
-      setError("Failed to logout");
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-agri-gray flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-agri-green mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading farm data...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-agri-gray">
-      <Navbar user={user} onLogout={handleLogout} />
+    <div className="flex h-screen bg-gray-50">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col" style={{ marginLeft: '256px' }}>
+        <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-            <p className="text-red-700">{error}</p>
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-7xl mx-auto px-8 py-12">
+            {/* Hero Section with Image Placeholder */}
+            <div className="mb-16">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                  <div className="w-16 h-2 accent-block mb-6"></div>
+                  <h1 className="lab-heading mb-6">
+                    Cardamom
+                    <br />Farming
+                    <br /><span className="text-orange-500">System</span>.
+                  </h1>
+                  <p className="lab-body text-lg mb-8">
+                    Hardware-integrated soil monitoring with AI-powered insights
+                    for precision elachi cultivation and optimal yield.
+                  </p>
+                  <button
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    className={`lab-button flex items-center gap-3 ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                    Refresh Data
+                  </button>
+                </div>
+                <div className="image-placeholder h-96">
+                  Hero Image
+                  <br />
+                  (Coming Soon)
+                </div>
+              </div>
+            </div>
+
+            {/* Status Info */}
+            <div className="lab-card mb-12">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="text-orange-600" size={20} />
+                </div>
+                <div>
+                  <p className="font-semibold text-black text-lg">System Status</p>
+                  <p className="text-gray-600">Last updated: {sensorData.lastUpdate}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sensor Metrics Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+              <NitrogenCard value={sensorData.nitrogen} />
+              <pHGauge value={sensorData.ph} />
+              <BoronGauge value={sensorData.boron} />
+            </div>
+
+            {/* Secondary Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+              <div className="lab-card">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="lab-subheading">Temperature</h3>
+                    <p className="lab-body mt-1">Soil temperature monitoring</p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <div className="w-6 h-6 accent-block rounded"></div>
+                  </div>
+                </div>
+                <div className="text-4xl font-black text-black mb-2">
+                  {sensorData.temperature}°C
+                </div>
+                <p className="lab-body">Optimal for growth rate estimation</p>
+              </div>
+
+              <div className="lab-card">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="lab-subheading">Soil Moisture</h3>
+                    <p className="lab-body mt-1">Irrigation scheduling data</p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <div className="w-6 h-6 bg-blue-500 rounded"></div>
+                  </div>
+                </div>
+                <div className="text-4xl font-black text-black mb-2">
+                  {sensorData.moisture}%
+                </div>
+                <p className="lab-body">Perfect for optimal irrigation</p>
+              </div>
+            </div>
+
+            {/* Analytics Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+              <HistoryChart data={sensorData.history} />
+              <RemedyPanel sensorData={sensorData} />
+            </div>
+
+            {/* Image Gallery Placeholder */}
+            <div className="mb-16">
+              <div className="text-center mb-8">
+                <h2 className="lab-subheading mb-4">Visual Documentation</h2>
+                <p className="lab-body">Field imagery and sensor deployment photos</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="image-placeholder aspect-square">
+                  Field Image 1
+                  <br />
+                  (Coming Soon)
+                </div>
+                <div className="image-placeholder aspect-square">
+                  Field Image 2
+                  <br />
+                  (Coming Soon)
+                </div>
+                <div className="image-placeholder aspect-square">
+                  Field Image 3
+                  <br />
+                  (Coming Soon)
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
+                <h3 className="text-lg font-light text-white mb-4">Temperature</h3>
+                <div className="flex items-end gap-4">
+                  <div className="text-3xl font-light text-orange-400">
+                    {sensorData.temperature}°C
+                  </div>
+                  <div className="text-sm text-neutral-400 pb-2">
+                    Soil temperature for growth rate estimation
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
+                <h3 className="text-lg font-light text-white mb-4">Soil Moisture</h3>
+                <div className="flex items-end gap-4">
+                  <div className="text-3xl font-light text-blue-400">
+                    {sensorData.moisture}%
+                  </div>
+                  <div className="text-sm text-neutral-400 pb-2">
+                    Optimal irrigation scheduling
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-agri-green mb-2">Farm Dashboard</h1>
-          <p className="text-gray-600">Real-time monitoring of your cardamom farm</p>
-          {sensorData?.lastUpdate && (
-            <p className="text-sm text-gray-500 mt-2">
-              Last updated: {new Date(sensorData.lastUpdate).toLocaleTimeString()}
-            </p>
-          )}
-        </div>
-
-        {/* Sensor Cards Grid */}
-        {sensorData && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-              <SensorCard
-                label="Nitrogen (N)"
-                value={sensorData.nitrogen}
-                unit="mg/kg"
-                optimal={[40, 60]}
-                icon="🌱"
-              />
-              <SensorCard
-                label="Phosphorus (P)"
-                value={sensorData.phosphorus}
-                unit="mg/kg"
-                optimal={[20, 40]}
-                icon="💛"
-              />
-              <SensorCard
-                label="Potassium (K)"
-                value={sensorData.potassium}
-                unit="mg/kg"
-                optimal={[100, 150]}
-                icon="🔵"
-              />
-              <SensorCard
-                label="pH Level"
-                value={sensorData.ph}
-                unit="pH"
-                optimal={[6.0, 7.5]}
-                icon="⚗️"
-              />
-              <SensorCard
-                label="Boron (B)"
-                value={sensorData.boron}
-                unit="mg/kg"
-                optimal={[1.5, 3.0]}
-                icon="💚"
-              />
-            </div>
-
-            {/* Fertilizer Advice Section */}
-            <FertilizerAdvice
-              nitrogen={sensorData.nitrogen}
-              phosphorus={sensorData.phosphorus}
-              potassium={sensorData.potassium}
-              boron={sensorData.boron}
-              ph={sensorData.ph}
-            />
-
-            {/* Quick Actions */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                onClick={() => navigate("/leaf-scanner")}
-                className="bg-white rounded-lg p-6 shadow hover:shadow-lg transition flex items-center gap-4 hover:bg-agri-gray"
-              >
-                <Leaf className="w-8 h-8 text-agri-green" />
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">Leaf Health Check</h3>
-                  <p className="text-sm text-gray-600">Scan a leaf for disease detection</p>
-                </div>
-              </button>
-              <button
-                className="bg-white rounded-lg p-6 shadow hover:shadow-lg transition flex items-center gap-4 hover:bg-agri-gray"
-              >
-                <TrendingUp className="w-8 h-8 text-agri-green" />
-                <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">View Analytics</h3>
-                  <p className="text-sm text-gray-600">Historical trends and patterns</p>
-                </div>
-              </button>
-            </div>
-          </>
-        )}
+        </main>
       </div>
     </div>
   );
