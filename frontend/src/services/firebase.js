@@ -3,8 +3,10 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  updateProfile
 } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Firebase configuration - matches backend Firebase project
 const firebaseConfig = {
@@ -23,9 +25,17 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication
 const auth = getAuth(app);
 
+// Initialize Firestore
+const db = getFirestore(app);
+
 export {
   auth,
+  db,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
+  signOut,
+  updateProfile,
+  doc,
+  setDoc,
+  getDoc
 };

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { auth, createUserWithEmailAndPassword } from '../services/firebase';
+import { auth, db, createUserWithEmailAndPassword, updateProfile, doc, setDoc } from '../services/firebase';
 import { Leaf, AlertCircle, Loader, Eye, EyeOff } from 'lucide-react';
 
 export default function SignUp() {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,8 +32,24 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // Here you would also save the farmName to the database
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const newUser = userCredential.user;
+
+      // Set displayName on Firebase Auth profile
+      await updateProfile(newUser, { displayName: fullName });
+
+      // Save full profile to Firestore
+      await setDoc(doc(db, 'users', newUser.uid), {
+        name: fullName,
+        email: email,
+        farmName: farmName,
+        phone: '',
+        location: '',
+        yearsExperience: '',
+        preferredLanguage: 'English',
+        createdAt: new Date().toISOString()
+      });
+
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -83,6 +100,20 @@ export default function SignUp() {
             )}
 
             <form onSubmit={handleSignUp} className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-black mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-black transition-colors"
+                  placeholder="Your full name"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-black mb-2">
                   Cardamom Farm Name

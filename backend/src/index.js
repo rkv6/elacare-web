@@ -30,10 +30,12 @@ app.get("/health", (req, res) => {
 const authRoutes = await import("./routes/auth.js");
 const sensorRoutes = await import("./routes/sensors.js");
 const esp32Routes = await import("./routes/esp32.js");
+const aiRoutes = await import("../routes/ai.js");
 
 app.use("/api/auth", authRoutes.default);
 app.use("/api/sensors", sensorRoutes.default);
 app.use("/api/esp32", esp32Routes.default);
+app.use("/api/ai", aiRoutes.default);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
