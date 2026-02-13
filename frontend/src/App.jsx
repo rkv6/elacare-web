@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Sidebar from './components/Sidebar';
+import { SidebarProvider, SidebarTrigger } from './components/ui/sidebar';
+import { AppSidebar } from './components/app-sidebar';
 
 // Pages
 import Home from './pages/Home';
@@ -33,10 +34,23 @@ function ProtectedRoute({ element }) {
   }
 
   return (
-    <>
-      <Sidebar />
-      {element}
-    </>
+    <SidebarProvider>
+      <AppSidebar />
+      <main className="flex-1 flex flex-col bg-gray-50 bento-grid-bg transition-all duration-500 ease-in-out min-w-0">
+        {/* Mobile Header */}
+        <div className="md:hidden sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger />
+            <h1 className="text-lg font-black text-black">
+              ela<span className="text-orange-500">Care</span>.
+            </h1>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto transition-all duration-300 ease-in-out">
+          {element}
+        </div>
+      </main>
+    </SidebarProvider>
   );
 }
 

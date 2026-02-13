@@ -173,7 +173,7 @@ const [sensorData, setSensorData] = useState({
 ### Update Sidebar Colors
 Edit `src/components/Sidebar.jsx`:
 ```jsx
-<div className="w-64 bg-gradient-to-b from-green-900 to-green-800">
+<div className="w-64 bg-linear-to-b from-green-900 to-green-800">
                                           ↑
                                     Change colors here
 </div>

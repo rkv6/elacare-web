@@ -1,30 +1,140 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini API (update with your actual API key)
-const genAI = new GoogleGenerativeAI("YOUR_GOOGLE_GEMINI_API_KEY");
+// Get working model from localStorage or use default
+function getWorkingModel() {
+  try {
+    const savedModel = localStorage.getItem('workingGeminiModel');
+    if (savedModel) {
+      return savedModel;
+    }
+  } catch (error) {
+    console.error('Error reading working model:', error);
+  }
+  // Try common working models in order of preference
+  return "gemini-1.5-pro";
+}
+
+// Clear saved model when API key changes
+function clearSavedModel() {
+  try {
+    localStorage.removeItem('workingGeminiModel');
+    console.log('🔄 Cleared saved model for API key change');
+  } catch (error) {
+    console.error('Error clearing saved model:', error);
+  }
+}
+
+// Fallback models to try if primary fails (same as working test)
+const FALLBACK_MODELS = ["gemini-pro", "gemini-1.5-pro", "gemini-1.0-pro", "models/gemini-pro", "models/gemini-1.5-pro"];
+
+async function tryGenerateWithFallback(genAI, prompt) {
+  // First try to discover available models like the working test did
+  try {
+    console.log("🔍 Discovering available models...");
+    const models = await genAI.listModels();
+    const availableModels = models.filter(model => 
+      model.supportedGenerationMethods?.includes('generateContent')
+    );
+    
+    if (availableModels.length > 0) {
+      const modelName = availableModels[0].name.replace('models/', '');
+      console.log("✅ Using discovered model:", modelName);
+      
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      
+      // Save this working model for future use
+      localStorage.setItem('workingGeminiModel', modelName);
+      
+      return response.text();
+    }
+  } catch (discoveryError) {
+    console.log("📋 Model discovery failed, trying fallback models...");
+  }
+  
+  // Try fallback models (same list as successful test)
+  for (const modelName of FALLBACK_MODELS) {
+    try {
+      console.log(`🧪 Trying model: ${modelName}`);
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      
+      // Save working model for future use
+      localStorage.setItem('workingGeminiModel', modelName);
+      console.log(`✅ Model ${modelName} worked! Saved for future use.`);
+      
+      return response.text();
+    } catch (fallbackError) {
+      console.warn(`❌ Model ${modelName} failed:`, fallbackError.message);
+      continue;
+    }
+  }
+  
+  // If all failed, throw error
+  throw new Error('No working Gemini model found. Please check your API key permissions.');
+}
+
+// Get API key from localStorage or use provided key
+function getAPIKey() {
+  try {
+    const settings = localStorage.getItem('elacare-settings');
+    if (settings) {
+      const parsed = JSON.parse(settings);
+      return parsed.geminiKey || "AIzaSyAZflE2o_NKxHRfbVwty-Azig-b4zlDd_0";
+    }
+  } catch (error) {
+    console.error('Error reading API key from settings:', error);
+  }
+  return "AIzaSyCpunmMV2yNImLE6ZpgS1jECC-4l5M637I";
+}
+
+// Initialize Gemini API
+let genAI;
+
+function initializeGenAI() {
+  const apiKey = getAPIKey();
+  
+  // Check if API key changed and clear saved model if so
+  const lastUsedKey = localStorage.getItem('lastUsedApiKey');
+  if (lastUsedKey && lastUsedKey !== apiKey) {
+    clearSavedModel();
+  }
+  localStorage.setItem('lastUsedApiKey', apiKey);
+  
+  genAI = new GoogleGenerativeAI(apiKey);
+}
 
 export async function generateRemedy(sensorData) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
+    // Initialize or reinitialize GenAI to get latest API key
+    initializeGenAI();
+    
+    const apiKey = getAPIKey();
+    if (!apiKey || apiKey === "YOUR_GOOGLE_GEMINI_API_KEY") {
+      throw new Error('Please configure your Google Gemini API key in Settings');
+    }
+    
     const prompt = `
-You are an expert agricultural advisor. Analyze the following soil sensor data and provide specific, actionable recommendations:
+You are ElaCare's AI Agricultural Assistant for cardamom farming. Analyze the current soil sensor readings and provide comprehensive farming guidance.
 
-Soil Nitrogen (N): ${sensorData.nitrogen} mg/kg (Optimal: 40-80)
-Soil pH: ${sensorData.ph} (Optimal: 6.0-7.5)
-Soil Boron (B): ${sensorData.boron} mg/kg (Optimal: 1.5-3.0)
+CURRENT SOIL DATA:
+• Nitrogen (N): ${sensorData.nitrogen} mg/kg (Optimal: 40-80 mg/kg)
+• Soil pH: ${sensorData.ph} (Optimal: 6.0-7.5) 
+• Boron (B): ${sensorData.boron} mg/kg (Optimal: 1.5-3.0 mg/kg)
 
-Based on these values, provide:
-1. A brief assessment of the current soil health (1-2 sentences)
-2. Specific remedies or actions needed (3-4 points)
-3. Expected results if the remedies are applied within 2 weeks
+ANALYSIS REQUIRED:
+1. 🌱 SOIL HEALTH STATUS: Brief assessment of current conditions
+2. ⚡ IMMEDIATE ACTIONS: What needs to be done this week
+3. 📋 FERTILIZATION PLAN: Specific nutrient applications needed
+4. 📈 EXPECTED OUTCOMES: Results timeline (2-4 weeks)
+5. ⚠️ RISK ALERTS: Any critical issues to monitor
 
-Keep the response practical and specific to farming operations. Format as a clear, structured response.
+FORMAT: Use clear sections with emojis. Keep practical and specific for cardamom cultivation in tropical conditions.
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = await tryGenerateWithFallback(genAI, prompt);
 
     return {
       success: true,
@@ -33,17 +143,42 @@ Keep the response practical and specific to farming operations. Format as a clea
     };
   } catch (error) {
     console.error('Error generating remedy:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Full error:', error);
+    
+    let errorMessage = error.message || 'Unknown error occurred';
+    
+    // Check for common API errors
+    if (error.message?.includes('API_KEY_INVALID')) {
+      errorMessage = 'Invalid API Key. Please check your Gemini API key in Settings.';
+    } else if (error.message?.includes('QUOTA_EXCEEDED')) {
+      errorMessage = 'API quota exceeded. Please check your Google Cloud billing.';
+    } else if (error.message?.includes('PERMISSION_DENIED')) {
+      errorMessage = 'Permission denied. Please check API key permissions.';
+    } else if (error.message?.includes('fetch')) {
+      errorMessage = 'Network error. Please check your internet connection.';
+    }
+    
     return {
       success: false,
-      error: error.message,
-      remedy: 'Unable to generate recommendations at this time. Please try again later.'
+      error: errorMessage,
+      remedy: `Unable to generate recommendations: ${errorMessage}`
     };
   }
 }
 
 export async function analyzeTrend(historicalData) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // Initialize or reinitialize GenAI to get latest API key
+    initializeGenAI();
+    
+    const apiKey = getAPIKey();
+    if (!apiKey || apiKey === "YOUR_GOOGLE_GEMINI_API_KEY") {
+      throw new Error('Please configure your Google Gemini API key in Settings');
+    }
+    
+    const model = genAI.getGenerativeModel({ model: getWorkingModel() });
 
     const trendString = historicalData
       .map(d => `Day: pH=${d.ph}, N=${d.nitrogen}, B=${d.boron}`)
@@ -63,9 +198,7 @@ Provide:
 Keep response concise and actionable.
     `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    const text = await tryGenerateWithFallback(genAI, prompt);
 
     return {
       success: true,
@@ -74,10 +207,22 @@ Keep response concise and actionable.
     };
   } catch (error) {
     console.error('Error analyzing trend:', error);
+    console.error('Error details:', error.message);
+    
+    let errorMessage = error.message || 'Unknown error occurred';
+    
+    if (error.message?.includes('API_KEY_INVALID')) {
+      errorMessage = 'Invalid API Key. Please check your Gemini API key in Settings.';
+    } else if (error.message?.includes('QUOTA_EXCEEDED')) {
+      errorMessage = 'API quota exceeded. Please check your Google Cloud billing.';
+    } else if (error.message?.includes('PERMISSION_DENIED')) {
+      errorMessage = 'Permission denied. Please check API key permissions.';
+    }
+    
     return {
       success: false,
-      error: error.message,
-      analysis: 'Unable to analyze trend data at this time.'
+      error: errorMessage,
+      analysis: `Unable to analyze trend data: ${errorMessage}`
     };
   }
 }

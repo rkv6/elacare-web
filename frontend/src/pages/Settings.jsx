@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
-import { Save, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, CheckCircle, SlidersHorizontal, Bell, Key } from 'lucide-react';
 
 export default function Settings() {
   const [settings, setSettings] = useState({
@@ -10,99 +9,89 @@ export default function Settings() {
     notifications: true,
     emailAlerts: true,
     smsAlerts: false,
-    geminiKey: ''
+    geminiKey: 'AIzaSyCpunmMV2yNImLE6ZpgS1jECC-4l5M637I'
   });
 
   const [saved, setSaved] = useState(false);
 
-  const handleChange = (field, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('elacare-settings');
+    if (savedSettings) {
+      try {
+        setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    } else {
+      localStorage.setItem('elacare-settings', JSON.stringify(settings));
+    }
+  }, []);
+
+  const handleChange = (field, value) => setSettings(prev => ({ ...prev, [field]: value }));
 
   const handleSave = () => {
-    // Save settings to backend
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      localStorage.setItem('elacare-settings', JSON.stringify(settings));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
   };
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      <div className="flex-1 flex flex-col" style={{ marginLeft: '256px' }}>
-        <Navbar />
+  const inputClass = "w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-gray-900 text-sm transition-colors";
 
+  return (
+    <div className="flex h-full">
+      <div className="flex-1 flex flex-col">
         <main className="flex-1 overflow-auto">
-          <div className="max-w-4xl mx-auto px-8 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-            <p className="text-gray-600 mb-8">
-              Manage your cardamom farm settings and preferences
-            </p>
+          <div className="max-w-3xl mx-auto px-6 sm:px-8 py-8 sm:py-12">
+            {/* Header */}
+            <div className="mb-10">
+              <p className="section-label mb-2">Configuration</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-1">Settings</h1>
+              <p className="text-sm text-gray-500">Manage your cardamom farm preferences</p>
+            </div>
 
             {saved && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-                <AlertCircle className="text-green-600" size={20} />
-                <p className="text-green-800 font-semibold">Settings saved successfully!</p>
+              <div className="bento-card mb-6 !border-emerald-200 !bg-emerald-50/50">
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle className="text-emerald-600" size={18} />
+                  <p className="text-sm font-semibold text-emerald-800">Settings saved successfully</p>
+                </div>
               </div>
             )}
 
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Farm Settings */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Cardamom Farm Settings</h2>
-                
-                <div className="space-y-4">
-                  {/* Fixed Crop Type Display */}
+              <div className="bento-card">
+                <div className="flex items-center gap-2 mb-6">
+                  <SlidersHorizontal size={16} className="text-emerald-600" />
+                  <p className="section-label">Farm Settings</p>
+                </div>
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Crop Type
-                    </label>
-                    <div className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 font-medium">
-                      Cardamom (Elachi) - Hardware Integrated System
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Crop Type</label>
+                    <div className="px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-700 font-medium font-mono">
+                      Cardamom (Elachi) — Hardware Integrated
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      This system is specifically designed for cardamom cultivation
-                    </p>
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Field Size (hectares)
-                    </label>
-                    <input
-                      type="number"
-                      value={settings.fieldSize}
-                      onChange={(e) => handleChange('fieldSize', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Field Size (acres)</label>
+                    <input type="number" value={settings.fieldSize} onChange={(e) => handleChange('fieldSize', e.target.value)} className={inputClass} />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Soil Type
-                    </label>
-                    <select
-                      value={settings.soilType}
-                      onChange={(e) => handleChange('soilType', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Soil Type</label>
+                    <select value={settings.soilType} onChange={(e) => handleChange('soilType', e.target.value)} className={inputClass}>
                       <option value="loam">Loam</option>
                       <option value="clay">Clay</option>
                       <option value="sandy">Sandy</option>
                       <option value="silty">Silty</option>
                     </select>
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Irrigation Mode
-                    </label>
-                    <select
-                      value={settings.irrigationMode}
-                      onChange={(e) => handleChange('irrigationMode', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Irrigation Mode</label>
+                    <select value={settings.irrigationMode} onChange={(e) => handleChange('irrigationMode', e.target.value)} className={inputClass}>
                       <option value="automatic">Automatic</option>
                       <option value="manual">Manual</option>
                       <option value="hybrid">Hybrid</option>
@@ -111,71 +100,46 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Notification Settings */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Notifications</h2>
-                
+              {/* Notifications */}
+              <div className="bento-card">
+                <div className="flex items-center gap-2 mb-6">
+                  <Bell size={16} className="text-emerald-600" />
+                  <p className="section-label">Notifications</p>
+                </div>
                 <div className="space-y-4">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications}
-                      onChange={(e) => handleChange('notifications', e.target.checked)}
-                      className="w-4 h-4 border border-gray-300 rounded"
-                    />
-                    <span className="text-gray-700">Enable in-app notifications</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.emailAlerts}
-                      onChange={(e) => handleChange('emailAlerts', e.target.checked)}
-                      className="w-4 h-4 border border-gray-300 rounded"
-                    />
-                    <span className="text-gray-700">Send email alerts for critical events</span>
-                  </label>
-
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.smsAlerts}
-                      onChange={(e) => handleChange('smsAlerts', e.target.checked)}
-                      className="w-4 h-4 border border-gray-300 rounded"
-                    />
-                    <span className="text-gray-700">Send SMS alerts for critical events</span>
-                  </label>
+                  {[
+                    { key: 'notifications', text: 'Enable in-app notifications' },
+                    { key: 'emailAlerts', text: 'Send email alerts for critical events' },
+                    { key: 'smsAlerts', text: 'Send SMS alerts for critical events' }
+                  ].map(({ key, text }) => (
+                    <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                      <input type="checkbox" checked={settings[key]}
+                        onChange={(e) => handleChange(key, e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
+                      <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{text}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              {/* API Configuration */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">API Configuration</h2>
-                
+              {/* API Config */}
+              <div className="bento-card">
+                <div className="flex items-center gap-2 mb-6">
+                  <Key size={16} className="text-emerald-600" />
+                  <p className="section-label">API Configuration</p>
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Google Gemini API Key
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="Enter your API key for AI recommendations"
-                    value={settings.geminiKey}
-                    onChange={(e) => handleChange('geminiKey', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                  <p className="text-sm text-gray-500 mt-2">
-                    Get your API key from Google Cloud Console
-                  </p>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Google Gemini API Key</label>
+                  <input type="password" placeholder="Enter your API key" value={settings.geminiKey}
+                    onChange={(e) => handleChange('geminiKey', e.target.value)} className={inputClass} />
+                  <p className="text-[11px] text-gray-400 mt-1.5 font-mono">Get your key from Google Cloud Console</p>
                 </div>
               </div>
 
-              {/* Save Button */}
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <Save size={20} />
-                Save Settings
+              {/* Save */}
+              <button onClick={handleSave}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors">
+                <Save size={16} /> Save Settings
               </button>
             </div>
           </div>

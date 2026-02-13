@@ -1,103 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    /* Lab-style color palette */
     --bg-primary: #ffffff;
-    --bg-secondary: #fafafa;
-    --bg-accent: #f8f9fa;
-    --text-primary: #1a1a1a;
-    --text-secondary: #666666;
+    --bg-secondary: #f7f7f8;
+    --bg-accent: #f0f0f2;
+    --text-primary: #111111;
+    --text-secondary: #555555;
     --text-muted: #999999;
-    --border-light: #e5e7eb;
-    --border-default: #d1d5db;
-    --accent-orange: #ff4500;
+    --border-light: #e8e8ec;
+    --border-default: #d4d4d8;
+    --emerald: #10b981;
+    --emerald-dark: #059669;
+    --slate: #475569;
+    --accent-orange: #ea580c;
     --accent-red: #dc2626;
-    --accent-dark: #1a1a1a;
-    --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --accent-dark: #111111;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    font-family: var(--font-sans);
     color-scheme: light;
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     min-height: 100vh;
-    background-color: var(--bg-primary);
+    background-color: var(--bg-secondary);
     color: var(--text-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  input,
-  textarea,
-  select {
+  input, textarea, select {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-sans);
   }
 
-  input::placeholder,
-  textarea::placeholder {
-    color: var(--text-muted);
-    opacity: 1;
-  }
+  input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1; }
 
-  input:focus,
-  textarea:focus,
-  select:focus {
+  input:focus, textarea:focus, select:focus {
     outline: none;
-    border-color: var(--accent-orange);
-    box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
   }
 
   button:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(255, 69, 0, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
   }
 
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+}
 
-  ::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
-  }
+/* ── Bento grid background ── */
+.bento-grid-bg {
+  position: relative;
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+}
+.bento-grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(0,0,0,0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.bento-grid-bg > * {
+  position: relative;
+  z-index: 1;
 }
 
 @layer components {
-  /* Lab-style typography */
+  /* ── Typography ── */
   .lab-heading {
+    font-family: var(--font-sans);
     font-weight: 800;
-    font-size: 3.5rem;
-    line-height: 1;
-    letter-spacing: -0.025em;
+    font-size: 1.75rem;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
     color: var(--text-primary);
   }
+  @media (min-width: 640px) { .lab-heading { font-size: 2.5rem; } }
+  @media (min-width: 1024px) { .lab-heading { font-size: 3rem; } }
 
   .lab-subheading {
-    font-weight: 600;
-    font-size: 1.5rem;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 1.1rem;
     line-height: 1.2;
+    letter-spacing: -0.01em;
     color: var(--text-primary);
   }
+  @media (min-width: 640px) { .lab-subheading { font-size: 1.25rem; } }
 
   .lab-body {
     font-weight: 400;
@@ -105,94 +119,126 @@
     line-height: 1.6;
   }
 
-  /* Orange accent blocks */
+  .font-mono { font-family: var(--font-mono) !important; }
+
+  /* ── Accent bar ── */
   .accent-block {
     background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-red) 100%);
-    border-radius: 8px;
+    border-radius: 4px;
   }
 
-  /* Clean button styles */
+  /* ── Buttons ── */
   .lab-button {
     background: var(--accent-dark);
     color: white;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
-
-  .lab-button:hover {
-    background: #2a2a2a;
-    transform: translateY(-1px);
-  }
+  .lab-button:hover { background: #2a2a2a; transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
   .lab-button-outline {
     background: transparent;
     color: var(--text-primary);
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
     border: 1px solid var(--border-default);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
+  .lab-button-outline:hover { border-color: var(--emerald); color: var(--emerald); }
 
-  .lab-button-outline:hover {
-    border-color: var(--accent-orange);
-    color: var(--accent-orange);
-  }
-
-  /* Image placeholder styles */
+  /* ── Placeholder ── */
   .image-placeholder {
     background: var(--bg-accent);
-    border: 2px dashed var(--border-default);
-    border-radius: 8px;
+    border: 1.5px dashed var(--border-default);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     color: var(--text-muted);
     font-weight: 500;
+    font-size: 0.875rem;
   }
 
-  /* Card styles */
+  /* ── Bento Card ── */
+  .bento-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    transition: all 0.2s ease;
+  }
+  @media (min-width: 640px) { .bento-card { padding: 24px; } }
+  .bento-card:hover { box-shadow: var(--shadow-md); }
+
+  /* Legacy .lab-card maps to .bento-card */
   .lab-card {
     background: var(--bg-primary);
     border: 1px solid var(--border-light);
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: var(--shadow-light);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow-xs);
     transition: all 0.2s ease;
   }
+  @media (min-width: 640px) { .lab-card { padding: 24px; } }
+  .lab-card:hover { box-shadow: var(--shadow-md); }
 
-  .lab-card:hover {
-    box-shadow: var(--shadow-medium);
-    transform: translateY(-2px);
+  /* ── Status pill ── */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .status-pill--optimal { background: #ecfdf5; color: #065f46; }
+  .status-pill--warning { background: #fffbeb; color: #92400e; }
+  .status-pill--danger  { background: #fef2f2; color: #991b1b; }
+  .status-pill--info    { background: #eff6ff; color: #1e40af; }
+
+  /* ── Data value (monospace) ── */
+  .data-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  /* ── Section divider ── */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 }
 
 @layer utilities {
-  .text-lab-primary {
-    color: var(--text-primary);
-  }
-  
-  .text-lab-secondary {
-    color: var(--text-secondary);
-  }
-  
-  .text-lab-muted {
-    color: var(--text-muted);
-  }
-  
-  .bg-lab-primary {
-    background-color: var(--bg-primary);
-  }
-  
-  .bg-lab-secondary {
-    background-color: var(--bg-secondary);
-  }
+  .text-lab-primary { color: var(--text-primary); }
+  .text-lab-secondary { color: var(--text-secondary); }
+  .text-lab-muted { color: var(--text-muted); }
+  .bg-lab-primary { background-color: var(--bg-primary); }
+  .bg-lab-secondary { background-color: var(--bg-secondary); }
 }
+
+/* ── Animations ── */
+@keyframes slide-in-left { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+.animate-slide-in { animation: slide-in-left 0.3s ease-out; }
+
+html, body { overflow-x: hidden; }
 
 
