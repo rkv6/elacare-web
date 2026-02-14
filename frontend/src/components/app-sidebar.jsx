@@ -7,8 +7,7 @@ import {
   Settings, 
   User, 
   LogOut,
-  ChevronLeft,
-  ChevronRight
+  ChevronLeft
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSidebar } from './ui/sidebar';
@@ -66,7 +65,7 @@ export function AppSidebar() {
                       ? 'bg-emerald-600 text-white font-semibold shadow-sm'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'
                   }`}>
-                  <Icon size={17} className="flex-shrink-0" />
+                  <Icon size={17} className="shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -77,9 +76,9 @@ export function AppSidebar() {
             <div className="border-t border-gray-100 p-4">
               <div className="flex items-center gap-3">
                 {profilePhoto ? (
-                  <img src={profilePhoto} alt="" className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
+                  <img src={profilePhoto} alt="" className="w-9 h-9 rounded-xl object-cover shrink-0" />
                 ) : (
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
                   <span className="text-emerald-700 font-bold text-sm font-mono">{(user.displayName || user.email)?.charAt(0).toUpperCase()}</span>
                 </div>
                 )}
@@ -100,31 +99,31 @@ export function AppSidebar() {
 
   // Desktop sidebar
   return (
-    <div className={`${isCollapsed ? 'w-[68px]' : 'w-60'} min-h-screen bg-white border-r border-gray-100 flex flex-col transition-all duration-300 ease-in-out`}>
+    <div className={`${isCollapsed ? 'w-17' : 'w-60'} min-h-screen bg-white border-r border-gray-100 flex flex-col transition-all duration-300 ease-in-out`}>
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
           {!isCollapsed ? (
-            <div className="flex items-center gap-2.5 cursor-pointer" onDoubleClick={toggleCollapsed}>
-              <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
-                <Leaf size={14} className="text-white" />
+            <>
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
+                  <Leaf size={14} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-base font-bold text-gray-900 tracking-tight leading-none">
+                    ela<span className="text-emerald-600">Care</span>
+                  </h1>
+                  <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest mt-0.5">Farm IoT</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-base font-bold text-gray-900 tracking-tight leading-none">
-                  ela<span className="text-emerald-600">Care</span>
-                </h1>
-                <p className="text-[9px] font-mono text-gray-400 uppercase tracking-widest mt-0.5">Farm IoT</p>
-              </div>
-            </div>
+              <button onClick={toggleCollapsed} className="p-1 hover:bg-gray-50 rounded-lg transition-colors" title="Collapse">
+                <ChevronLeft size={14} className="text-gray-400" />
+              </button>
+            </>
           ) : (
-            <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center mx-auto cursor-pointer" onDoubleClick={toggleCollapsed}>
+            <button onClick={toggleCollapsed} className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center mx-auto hover:bg-emerald-700 transition-colors" title="Expand sidebar">
               <Leaf size={14} className="text-white" />
-            </div>
+            </button>
           )}
-          <button onClick={toggleCollapsed}
-            className={`p-1 hover:bg-gray-50 rounded-lg transition-all duration-200 ${isCollapsed ? 'hidden' : ''}`}
-            title={isCollapsed ? 'Expand' : 'Collapse'}>
-            <ChevronLeft size={14} className="text-gray-400" />
-          </button>
         </div>
       </div>
 
@@ -140,21 +139,14 @@ export function AppSidebar() {
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'
               }`}
               title={isCollapsed ? item.label : undefined}>
-              <Icon size={17} className="flex-shrink-0" />
+              <Icon size={17} className="shrink-0" />
               {!isCollapsed && <span>{item.label}</span>}
             </Link>
           );
         })}
       </nav>
 
-      {/* Collapsed expand button */}
-      {isCollapsed && (
-        <div className="p-3">
-          <button onClick={toggleCollapsed} className="w-full flex items-center justify-center p-2 hover:bg-gray-50 rounded-xl transition-colors">
-            <ChevronRight size={14} className="text-gray-400" />
-          </button>
-        </div>
-      )}
+
 
       <div className="border-t border-gray-100">
         {user && (
@@ -162,9 +154,9 @@ export function AppSidebar() {
             {!isCollapsed ? (
               <div className="flex items-center gap-2.5">
                 {profilePhoto ? (
-                  <img src={profilePhoto} alt="" className="w-8 h-8 rounded-xl object-cover flex-shrink-0" />
+                  <img src={profilePhoto} alt="" className="w-8 h-8 rounded-xl object-cover shrink-0" />
                 ) : (
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
                   <span className="text-emerald-700 font-bold text-xs font-mono">{(user.displayName || user.email)?.charAt(0).toUpperCase()}</span>
                 </div>
                 )}

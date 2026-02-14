@@ -54,7 +54,7 @@ export default function Settings() {
             </div>
 
             {saved && (
-              <div className="bento-card mb-6 !border-emerald-200 !bg-emerald-50/50">
+              <div className="bento-card mb-6 border-emerald-200! bg-emerald-50/50!">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle className="text-emerald-600" size={18} />
                   <p className="text-sm font-semibold text-emerald-800">Settings saved successfully</p>

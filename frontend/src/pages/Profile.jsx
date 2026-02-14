@@ -207,7 +207,7 @@ export default function Profile() {
             </div>
 
             {saved && (
-              <div className="bento-card mb-6 !border-emerald-200 !bg-emerald-50/50">
+              <div className="bento-card mb-6 border-emerald-200! bg-emerald-50/50!">
                 <p className="text-sm font-semibold text-emerald-800">Profile updated successfully</p>
               </div>
             )}
@@ -278,7 +278,7 @@ export default function Profile() {
                     <div className="flex items-center gap-2">
                       {profile.location ? (
                         <>
-                          <MapPin size={14} className="text-emerald-600 flex-shrink-0" />
+                          <MapPin size={14} className="text-emerald-600 shrink-0" />
                           <p className="text-sm text-gray-900 py-1">{profile.location}</p>
                         </>
                       ) : (
@@ -310,7 +310,7 @@ export default function Profile() {
             )}
 
             {/* Danger Zone */}
-            <div className="bento-card mt-6 !border-red-100">
+            <div className="bento-card mt-6 border-red-100!">
               <p className="text-xs font-semibold text-red-800 uppercase tracking-wide mb-3">Danger Zone</p>
               <button className="px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-xl hover:bg-red-700 transition-colors">
                 Delete Account
