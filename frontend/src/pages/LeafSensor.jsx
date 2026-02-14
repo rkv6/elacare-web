@@ -81,7 +81,7 @@ export default function LeafSensor() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Upload Card */}
-              <div className="bento-card flex flex-col items-center justify-center text-center min-h-[360px]">
+              <div className="bento-card flex flex-col items-center justify-center text-center min-h-90">
                 {!uploadedImage ? (
                   <>
                     <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-5">
@@ -115,7 +115,7 @@ export default function LeafSensor() {
               </div>
 
               {/* Results Card */}
-              <div className="bento-card min-h-[360px] flex flex-col">
+              <div className="bento-card min-h-90 flex flex-col">
                 <p className="section-label mb-4">Analysis Results</p>
 
                 {!analysis && !loading && !error && (
