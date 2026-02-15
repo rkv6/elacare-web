@@ -76,18 +76,27 @@ async function tryGenerateWithFallback(genAI, prompt) {
   throw new Error('No working Gemini model found. Please check your API key permissions.');
 }
 
-// Get API key from localStorage or use provided key
+// Get API key from environment variables or localStorage
 function getAPIKey() {
   try {
+    // First, try to get from localStorage (user-configured)
     const settings = localStorage.getItem('elacare-settings');
     if (settings) {
       const parsed = JSON.parse(settings);
-      return parsed.geminiKey || "AIzaSyAZflE2o_NKxHRfbVwty-Azig-b4zlDd_0";
+      if (parsed.geminiKey) {
+        return parsed.geminiKey;
+      }
     }
   } catch (error) {
     console.error('Error reading API key from settings:', error);
   }
-  return "AIzaSyCpunmMV2yNImLE6ZpgS1jECC-4l5M637I";
+  // Fall back to environment variable
+  const envKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+  if (envKey) {
+    return envKey;
+  }
+  // No API key available
+  return null;
 }
 
 // Initialize Gemini API
@@ -112,8 +121,8 @@ export async function generateRemedy(sensorData) {
     initializeGenAI();
     
     const apiKey = getAPIKey();
-    if (!apiKey || apiKey === "YOUR_GOOGLE_GEMINI_API_KEY") {
-      throw new Error('Please configure your Google Gemini API key in Settings');
+    if (!apiKey || apiKey.trim() === "") {
+      throw new Error('Please configure your Google Gemini API key in Settings or environment');
     }
     
     const prompt = `

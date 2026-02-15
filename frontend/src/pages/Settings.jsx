@@ -9,7 +9,7 @@ export default function Settings() {
     notifications: true,
     emailAlerts: true,
     smsAlerts: false,
-    geminiKey: 'AIzaSyCpunmMV2yNImLE6ZpgS1jECC-4l5M637I'
+    geminiKey: import.meta.env.VITE_GOOGLE_AI_API_KEY || ''
   });
 
   const [saved, setSaved] = useState(false);
