@@ -10,7 +10,7 @@ export default function AIMonitor({ sensorData }) {
 
   useEffect(() => {
     analyzeData();
-    const interval = setInterval(analyzeData, 30000);
+    const interval = setInterval(analyzeData, 300000);
     return () => clearInterval(interval);
   }, [sensorData]);
 
@@ -145,7 +145,7 @@ export default function AIMonitor({ sensorData }) {
           {/* Auto-refresh */}
           <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[11px] font-mono text-gray-400">Auto-refreshing every 30 seconds</span>
+            <span className="text-[11px] font-mono text-gray-400">Auto-refreshing every 5 minutes</span>
           </div>
         </div>
       )}

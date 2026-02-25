@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import NitrogenCard from '../components/NitrogenCard';
 import PhosphorusCard from '../components/PhosphorusCard';
 import PotassiumCard from '../components/PotassiumCard';
@@ -7,37 +7,92 @@ import SoilMoistureCard from '../components/SoilMoistureCard';
 import HistoryChart from '../components/HistoryChart';
 import RemedyPanel from '../components/RemedyPanel';
 import AIMonitor from '../components/AIMonitor';
+import { AuthContext } from '../context/AuthContext';
+import { db, doc, onSnapshot, collection, query, orderBy, limit, getDocs } from '../services/firebase';
 import { RefreshCw, Activity, Droplets, Thermometer, Leaf } from 'lucide-react';
 
 export default function Dashboard() {
+  const { user } = useContext(AuthContext);
+  const farmId = user?.uid || 'JX7O6poLC5QPZ5zY0fMCVZqUC003';
+
   const [sensorData, setSensorData] = useState({
-    nitrogen: 52.5,
-    phosphorus: 18.9,
-    potassium: 127.5,
-    ph: 6.8,
-    boron: 2.2,
-    temperature: 28,
-    moisture: 65,
-    lastUpdate: new Date().toLocaleString(),
-    history: [
-      { day: 'Feb 6', date: '2026-02-06', nitrogen: 48.2, ph: 6.9, boron: 2.0, phosphorus: 17.8, potassium: 125.3 },
-      { day: 'Feb 7', date: '2026-02-07', nitrogen: 50.1, ph: 6.8, boron: 2.1, phosphorus: 18.2, potassium: 126.7 },
-      { day: 'Feb 8', date: '2026-02-08', nitrogen: 49.8, ph: 6.7, boron: 2.2, phosphorus: 18.0, potassium: 124.9 },
-      { day: 'Feb 9', date: '2026-02-09', nitrogen: 51.3, ph: 6.8, boron: 2.1, phosphorus: 18.4, potassium: 127.1 },
-      { day: 'Feb 10', date: '2026-02-10', nitrogen: 53.6, ph: 6.9, boron: 2.3, phosphorus: 19.0, potassium: 128.2 },
-      { day: 'Feb 11', date: '2026-02-11', nitrogen: 52.1, ph: 6.8, boron: 2.2, phosphorus: 18.7, potassium: 127.8 },
-      { day: 'Feb 12', date: '2026-02-12', nitrogen: 52.5, ph: 6.8, boron: 2.2, phosphorus: 18.9, potassium: 127.5 }
-    ]
+    nitrogen: 0,
+    phosphorus: 0,
+    potassium: 0,
+    ph: 0,
+    boron: 0,
+    temperature: 0,
+    moisture: 0,
+    lastUpdate: '—',
+    history: []
   });
 
   const [loading, setLoading] = useState(false);
+  const [connected, setConnected] = useState(false);
+
+  // Real-time listener for current sensor data
+  useEffect(() => {
+    const sensorRef = doc(db, 'farms', farmId, 'sensors', 'current');
+
+    const unsubscribe = onSnapshot(sensorRef, (snap) => {
+      if (snap.exists()) {
+        const d = snap.data();
+        setSensorData(prev => ({
+          ...prev,
+          nitrogen: d.nitrogen ?? 0,
+          phosphorus: d.phosphorus ?? 0,
+          potassium: d.potassium ?? 0,
+          ph: d.ph ?? 0,
+          boron: d.boron ?? 0,
+          temperature: d.temperature ?? 0,
+          moisture: d.humidity ?? 0,
+          lastUpdate: d.lastUpdate || new Date().toLocaleString()
+        }));
+        setConnected(true);
+      }
+    }, (error) => {
+      console.error('Firestore listener error:', error);
+      setConnected(false);
+    });
+
+    return () => unsubscribe();
+  }, [farmId]);
+
+  // Fetch sensor history
+  const fetchHistory = async () => {
+    try {
+      const historyRef = collection(db, 'farms', farmId, 'sensorHistory');
+      const q = query(historyRef, orderBy('timestamp', 'desc'), limit(7));
+      const snapshot = await getDocs(q);
+
+      const history = snapshot.docs.map(doc => {
+        const d = doc.data();
+        const date = d.timestamp?.toDate?.() || new Date(d.lastUpdate || Date.now());
+        return {
+          day: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          date: date.toISOString().split('T')[0],
+          nitrogen: d.nitrogen ?? 0,
+          ph: d.ph ?? 0,
+          boron: d.boron ?? 0,
+          phosphorus: d.phosphorus ?? 0,
+          potassium: d.potassium ?? 0
+        };
+      }).reverse();
+
+      setSensorData(prev => ({ ...prev, history }));
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, [farmId]);
 
   const handleRefresh = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setSensorData(prev => ({ ...prev, lastUpdate: new Date().toLocaleString() }));
-      setLoading(false);
-    }, 1000);
+    await fetchHistory();
+    setLoading(false);
   };
 
   const getPhStatus = (v) => {
@@ -67,8 +122,8 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-gray-400">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              LIVE
+              <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
+              {connected ? 'LIVE' : 'OFFLINE'}
             </div>
             <button onClick={handleRefresh} disabled={loading}
               className={`lab-button flex items-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -152,12 +207,12 @@ export default function Dashboard() {
                 <Activity size={18} className="text-emerald-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">System Online</p>
+                <p className="text-sm font-semibold text-gray-900">{connected ? 'System Online' : 'Waiting for Data'}</p>
                 <p className="text-xs text-gray-400 font-mono">Last sync: {sensorData.lastUpdate}</p>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-xs font-mono text-emerald-600">CONNECTED</span>
+                <div className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                <span className={`text-xs font-mono ${connected ? 'text-emerald-600' : 'text-gray-400'}`}>{connected ? 'CONNECTED' : 'WAITING'}</span>
               </div>
             </div>
           </div>

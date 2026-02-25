@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader, RefreshCw } from 'lucide-react';
+import { Sparkles, Loader, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { generateRemedyHybrid } from '../services/geminiServiceAccount';
 
 export default function RemedyPanel({ sensorData }) {
   const [remedy, setRemedy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     handleGenerateRemedy();
@@ -14,6 +15,7 @@ export default function RemedyPanel({ sensorData }) {
   const handleGenerateRemedy = async () => {
     setLoading(true);
     setError(null);
+    setExpanded(false);
     try {
       const result = await generateRemedyHybrid({
         nitrogen: sensorData.nitrogen || 45,
@@ -80,9 +82,31 @@ export default function RemedyPanel({ sensorData }) {
               Refresh
             </button>
           </div>
-          <div className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
-            {remedy}
+          
+          {/* Display recommendation with collapsible feature */}
+          <div className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed mb-3">
+            {expanded ? remedy : remedy.substring(0, 300) + (remedy.length > 300 ? '...' : '')}
           </div>
+
+          {/* See More/See Less Button */}
+          {remedy.length > 300 && (
+            <button 
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-2 mt-3 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+            >
+              {expanded ? (
+                <>
+                  <ChevronUp size={16} />
+                  See Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={16} />
+                  See More
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
     </div>
