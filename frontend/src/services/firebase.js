@@ -6,7 +6,7 @@ import {
   signOut,
   updateProfile
 } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, onSnapshot, getDocs } from 'firebase/firestore';
 
 // Firebase configuration - matches backend Firebase project
 const firebaseConfig = {
@@ -37,5 +37,11 @@ export {
   updateProfile,
   doc,
   setDoc,
-  getDoc
+  getDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  onSnapshot,
+  getDocs
 };

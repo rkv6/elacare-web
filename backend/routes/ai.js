@@ -33,11 +33,11 @@ async function testAvailableModels() {
   if (!genAI) return [];
   
   const testModels = [
+    'gemini-2.5-flash',
+    'gemini-3-flash',
     'gemini-pro',
     'gemini-1.5-pro', 
     'gemini-1.5-flash',
-    'gemini-1.5-pro-latest',
-    'gemini-1.5-flash-latest',
     'text-bison-001'
   ];
   
@@ -77,54 +77,56 @@ router.post('/generate-remedy', async (req, res) => {
 
     console.log(`🌱 Generating remedy for N:${nitrogen} pH:${ph} B:${boron}`);
 
-    // DEMO MODE - Generate AI-like response while API is being configured
-    const demoRemedy = `
-🌱 **SOIL HEALTH STATUS**
-Your cardamom farm shows: Nitrogen (${nitrogen} mg/kg), pH (${ph}), Boron (${boron} mg/kg)
+    // Call real Gemini AI API
+    if (!genAI) {
+      return res.status(500).json({
+        success: false,
+        error: 'Gemini AI not initialized. Add GOOGLE_AI_API_KEY to .env',
+        remedy: 'API not configured. Please add GOOGLE_AI_API_KEY to your .env file.'
+      });
+    }
 
-⚡ **IMMEDIATE ACTIONS**
-${nitrogen < 40 ? '• Apply organic nitrogen fertilizer (compost/vermicompost)' : '• Nitrogen levels adequate'}
-${ph < 6.0 ? '• Add lime to increase soil pH' : ph > 7.5 ? '• Add sulfur to reduce soil pH' : '• pH levels optimal for cardamom'}
-${boron < 1.5 ? '• Apply boric acid solution (1kg per acre)' : boron > 3.0 ? '• Reduce boron applications' : '• Boron levels optimal'}
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-📋 **FERTILIZATION PLAN**
-• Week 1: Apply balanced NPK (19:19:19) at 200g per plant
-• Week 2: Foliar spray with micronutrients
-• Week 3: Apply organic matter around root zone
-• Week 4: Monitor and adjust based on plant response
+    const prompt = `
+You are an expert agricultural advisor for cardamom farming. Based on the soil sensor data below, provide specific, actionable farming recommendations.
 
-📈 **EXPECTED OUTCOMES**
-• Days 7-10: Improved leaf color
-• Days 14-21: Enhanced root development
-• Days 21-28: Visible growth improvement
+SOIL SENSOR DATA:
+- Nitrogen (N): ${nitrogen} mg/kg
+- pH Level: ${ph}
+- Boron (B): ${boron} mg/kg
 
-⚠️ **RISK ALERTS**
-${nitrogen > 80 ? '• CAUTION: High nitrogen may cause leaf burn' : ''}
-${ph < 5.5 || ph > 8.0 ? '• URGENT: pH correction needed immediately' : ''}
-${boron > 4.0 ? '• WARNING: Boron toxicity risk - flush with water' : ''}
+Please provide:
+1. **SOIL HEALTH STATUS** - Brief assessment of current conditions
+2. **IMMEDIATE ACTIONS** - What to do in the next 48 hours
+3. **FERTILIZATION PLAN** - Week-by-week application plan
+4. **EXPECTED OUTCOMES** - Timeline for visible improvements
+5. **RISK ALERTS** - Any urgent issues or toxicity warnings
 
-*Note: This is a demo response. Configure Google AI API for full AI recommendations.*
-    `;
+Format your response with clear headers and bullet points. Be specific about quantities and timing.`;
 
-    console.log('✅ Generated demo remedy (API configuration pending)');
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const remedy = response.text();
+
+    console.log('✅ Generated remedy using Gemini AI');
 
     return res.json({
       success: true,
-      remedy: demoRemedy.trim(),
+      remedy: remedy,
       timestamp: new Date().toISOString(),
       sensorData: { nitrogen, ph, boron },
-      model: 'demo-mode',
-      source: 'backend-demo',
-      note: 'Demo mode active. Configure Google AI API for full AI recommendations.'
+      model: 'gemini-2.5-flash',
+      source: 'gemini-ai'
     });
 
   } catch (error) {
-    console.error('❌ Error in demo mode:', error);
+    console.error('❌ Error generating remedy:', error);
 
     res.status(500).json({
       success: false,
-      error: 'Demo mode error: ' + error.message,
-      remedy: 'Unable to generate recommendations. Please check backend configuration.'
+      error: error.message,
+      remedy: 'Unable to generate recommendations. Check API key and backend logs.'
     });
   }
 });
@@ -143,7 +145,7 @@ router.post('/test-ai', async (req, res) => {
     }
 
     // Test with simple prompt
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent('Hello, respond with "AI Working!"');
     const response = await result.response;
     const text = response.text();
@@ -175,7 +177,7 @@ router.post('/analyze-trend', async (req, res) => {
       });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const trendString = historicalData
       .map(d => `Day: pH=${d.ph}, N=${d.nitrogen}, B=${d.boron}`)
