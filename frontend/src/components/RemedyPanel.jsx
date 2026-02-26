@@ -8,9 +8,10 @@ export default function RemedyPanel({ sensorData }) {
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
 
+  // Only generate once on mount — not on every sensorData change
   useEffect(() => {
     handleGenerateRemedy();
-  }, [sensorData]);
+  }, []);
 
   const handleGenerateRemedy = async () => {
     setLoading(true);
