@@ -8,11 +8,12 @@ export default function AIMonitor({ sensorData }) {
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
 
+  // Only analyze once on mount, then every 5 minutes — NOT on every sensorData change
   useEffect(() => {
     analyzeData();
     const interval = setInterval(analyzeData, 300000);
     return () => clearInterval(interval);
-  }, [sensorData]);
+  }, []);
 
   const analyzeData = async () => {
     setLoading(true);
