@@ -1,28 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Brain, AlertTriangle, CheckCircle, Clock, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+import { Brain, AlertTriangle, CheckCircle, Clock, Zap, Sparkles } from 'lucide-react';
 import { generateRemedyHybrid } from '../services/geminiServiceAccount';
 
 export default function AIMonitor({ sensorData }) {
   const [analysis, setAnalysis] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
 
-  // Only analyze once on mount, then every 5 minutes — NOT on every sensorData change
-  useEffect(() => {
-    analyzeData();
-    const interval = setInterval(analyzeData, 300000);
-    return () => clearInterval(interval);
-  }, []);
-
   const analyzeData = async () => {
+    const hasData = sensorData.nitrogen > 0 || sensorData.ph > 0 || sensorData.boron > 0;
+    if (!hasData) {
+      setError('No sensor data available. Waiting for ESP32 readings...');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const result = await generateRemedyHybrid({
-        nitrogen: sensorData.nitrogen || 45,
-        ph: sensorData.ph || 6.8,
-        boron: sensorData.boron || 2.1
+        nitrogen: sensorData.nitrogen,
+        ph: sensorData.ph,
+        boron: sensorData.boron
       });
       if (result.success) {
         const parsed = parseAIResponse(result.remedy);
@@ -32,7 +30,14 @@ export default function AIMonitor({ sensorData }) {
         setError(result.remedy);
       }
     } catch (err) {
-      setError('AI monitoring temporarily unavailable');
+      const errorMsg = err.message || err.toString();
+      if (errorMsg.includes('quota') || errorMsg.includes('429') || errorMsg.includes('exceeded')) {
+        setError('📊 Daily Analysis Limit Reached - Come back tomorrow or enable billing to unlock unlimited requests');
+      } else if (errorMsg.includes('API') || errorMsg.includes('model')) {
+        setError('⚠️ AI service temporarily unavailable. Check your internet connection and try again.');
+      } else {
+        setError('❌ Analysis failed. Please try again in a moment.');
+      }
     } finally {
       setLoading(false);
     }
@@ -73,6 +78,40 @@ export default function AIMonitor({ sensorData }) {
     low:    { color: '#10b981', bg: '#ecfdf5' }
   };
 
+  const hasData = sensorData.nitrogen > 0 || sensorData.ph > 0 || sensorData.boron > 0;
+
+  // Show button to generate analysis if no analysis yet
+  if (!analysis && !loading && !error) {
+    return (
+      <div className="bento-card">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <Brain className="text-emerald-600" size={18} />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">AI Farm Monitor</h3>
+            <p className="text-xs text-gray-400">Real-time intelligent analysis</p>
+          </div>
+        </div>
+        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 text-center">
+          <p className="text-sm text-emerald-900 mb-4">
+            {hasData ? 
+              'Ready to analyze your soil data' : 
+              'Waiting for sensor data from ESP32...'}
+          </p>
+          <button
+            onClick={analyzeData}
+            disabled={!hasData}
+            className="px-6 py-2 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 mx-auto"
+          >
+            <Sparkles size={16} />
+            Generate Analysis
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bento-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
@@ -100,8 +139,16 @@ export default function AIMonitor({ sensorData }) {
       )}
 
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-100 p-4">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="rounded-xl bg-red-50 border border-red-200 p-5">
+          <p className="text-sm text-red-700 font-semibold mb-3">{error}</p>
+          {error.includes('Limit Reached') && (
+            <button
+              onClick={analyzeData}
+              className="text-sm text-red-600 hover:text-red-700 font-medium underline"
+            >
+              Try again anyway, or wait until tomorrow
+            </button>
+          )}
         </div>
       )}
 
@@ -143,10 +190,21 @@ export default function AIMonitor({ sensorData }) {
             </div>
           </div>
 
-          {/* Auto-refresh */}
-          <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-100">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[11px] font-mono text-gray-400">Auto-refreshing every 5 minutes</span>
+          {/* Data Source */}
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[11px] font-mono text-gray-400">
+                {lastUpdate ? `Updated ${new Date(lastUpdate).toLocaleTimeString()}` : 'Analysis generated'}
+              </span>
+            </div>
+            <button
+              onClick={analyzeData}
+              className="px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex items-center gap-1"
+            >
+              <Sparkles size={12} />
+              Regenerate
+            </button>
           </div>
         </div>
       )}

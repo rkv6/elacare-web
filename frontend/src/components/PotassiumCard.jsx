@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PotassiumCard({ value = 125.8, unit = 'mg/kg' }) {
+export default function PotassiumCard({ value = 0, unit = 'mg/kg' }) {
   const getStatus = (val) => {
     if (val < 80) return { label: 'DEFICIENT', color: '#ef4444', bg: '#fef2f2', hint: 'Potassium critically low' };
     if (val < 120) return { label: 'LOW', color: '#f59e0b', bg: '#fffbeb', hint: 'Enhance disease resistance' };

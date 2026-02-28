@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PhosphorusCard({ value = 18.5, unit = 'mg/kg' }) {
+export default function PhosphorusCard({ value = 0, unit = 'mg/kg' }) {
   const getStatus = (val) => {
     if (val < 10) return { label: 'DEFICIENT', color: '#ef4444', bg: '#fef2f2', hint: 'Critical — apply fertilizer' };
     if (val < 15) return { label: 'LOW', color: '#f59e0b', bg: '#fffbeb', hint: 'Needs supplementation' };

@@ -10,13 +10,8 @@ export default function Analytics() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredData, setFilteredData] = useState(null);
 
-  const historicalData = {
-    '2026-02-11': { nitrogen: 48.3, phosphorus: 18.9, potassium: 127.5, ph: 6.85, boron: 2.15, temperature: 22.5, moisture: 65 },
-    '2026-02-10': { nitrogen: 47.1, phosphorus: 18.5, potassium: 125.2, ph: 6.82, boron: 2.18, temperature: 21.8, moisture: 63 },
-    '2026-02-09': { nitrogen: 46.8, phosphorus: 17.9, potassium: 128.1, ph: 6.79, boron: 2.12, temperature: 23.1, moisture: 68 },
-    '2026-02-08': { nitrogen: 45.5, phosphorus: 19.1, potassium: 131.3, ph: 6.88, boron: 2.09, temperature: 22.3, moisture: 66 },
-    '2026-02-07': { nitrogen: 44.2, phosphorus: 18.2, potassium: 123.8, ph: 6.91, boron: 2.16, temperature: 21.9, moisture: 64 },
-  };
+  // Load real historical data from Firebase instead of demo data
+  const historicalData = {};
 
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
