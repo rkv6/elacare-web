@@ -1,22 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import HistoryChart from '../components/HistoryChart';
 import DatePicker from '../components/DatePicker';
 import BoronCard from '../components/BoronCard';
 import TemperatureCard from '../components/TemperatureCard';
 import SoilMoistureCard from '../components/SoilMoistureCard';
 import { Calendar, TrendingUp, Cpu } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { db, collection, query, orderBy, limit, getDocs } from '../services/firebase';
 
 export default function Analytics() {
+  const { user } = useContext(AuthContext);
+  const farmId = user?.uid || 'JX7O6poLC5QPZ5zY0fMCVZqUC003';
+  
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [filteredData, setFilteredData] = useState(null);
+  const [historyData, setHistoryData] = useState([]);
 
-  // Load real historical data from Firebase instead of demo data
-  const historicalData = {};
+  // Fetch sensor history from Firebase
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const historyRef = collection(db, 'farms', farmId, 'sensorHistory');
+        const q = query(historyRef, orderBy('timestamp', 'desc'), limit(7));
+        const snapshot = await getDocs(q);
+
+        const history = snapshot.docs.map(doc => {
+          const d = doc.data();
+          const date = d.timestamp?.toDate?.() || new Date(d.lastUpdate || Date.now());
+          return {
+            day: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            date: date.toISOString().split('T')[0],
+            nitrogen: d.nitrogen ?? 0,
+            ph: d.ph ?? 0,
+            boron: d.boron ?? 0,
+            phosphorus: d.phosphorus ?? 0,
+            potassium: d.potassium ?? 0,
+            temperature: d.temperature ?? 0,
+            moisture: d.humidity ?? 0
+          };
+        }).reverse();
+
+        setHistoryData(history);
+      } catch (error) {
+        console.error('Error fetching history:', error);
+      }
+    };
+
+    fetchHistory();
+  }, [farmId]);
 
   useEffect(() => {
     const dateKey = selectedDate.toISOString().split('T')[0];
-    setFilteredData(historicalData[dateKey] || null);
-  }, [selectedDate]);
+    const matchingData = historyData.find(d => d.date === dateKey);
+    setFilteredData(matchingData || null);
+  }, [selectedDate, historyData]);
 
   const formatDate = (date) => date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -97,7 +134,7 @@ export default function Analytics() {
 
             {/* Chart + Insights */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
-              <div className="lg:col-span-2"><HistoryChart /></div>
+              <div className="lg:col-span-2"><HistoryChart data={historyData} /></div>
               <div className="flex flex-col gap-5">
                 {filteredData && (
                   <div className="grid grid-cols-2 gap-4">

@@ -84,12 +84,40 @@ app = Flask(__name__)
 CORS(app)  # allow requests from Vite dev server (localhost:5173)
 
 
-def preprocess(image_bytes: bytes) -> np.ndarray:
+def preprocess(image_bytes: bytes) -> tuple[np.ndarray, Image.Image]:
     """Resize to 224×224, convert to RGB float32 array normalised to [0,1]."""
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     img = img.resize(IMG_SIZE)
     arr = np.array(img, dtype=np.float32) / 255.0
-    return np.expand_dims(arr, axis=0)  # (1, 224, 224, 3)
+    return np.expand_dims(arr, axis=0), img  # (1, 224, 224, 3), PIL Image
+
+
+def validate_leaf_image(predictions: np.ndarray) -> tuple[bool, str]:
+    """Multi-layer validation to reject non-leaf images."""
+    # ── Layer 1: High confidence threshold (80%) ──
+    max_confidence = float(np.max(predictions))
+    if max_confidence < 0.80:
+        return False, f"Low confidence ({max_confidence*100:.1f}%). Image may not be a clear leaf."
+    
+    # ── Layer 2: Entropy check - predictions too spread out = unclear image ──
+    # If model is unsure, entropy will be high; if biased, entropy will be low
+    entropy = -np.sum(predictions * np.log(predictions + 1e-10))
+    # For 3 classes, max entropy ≈ 1.099; we want concentrated predictions
+    if entropy > 0.9:  # If predictions are too scattered, it's probably not a leaf
+        return False, f"Uncertain prediction distribution. Image quality unclear."
+    
+    # ── Layer 3: Class balance check - reject if only blight is high ──
+    # Healthy leaf images should show reasonable "healthy" probability
+    blight_conf = float(predictions[0])
+    healthy_conf = float(predictions[1])
+    phyllo_conf = float(predictions[2])
+    
+    # If blight is suspiciously overdominant and healthy/phyllo are near-zero, reject
+    # (indicates model bias, not real leaf analysis)
+    if blight_conf > 0.90 and (healthy_conf + phyllo_conf) < 0.05:
+        return False, f"Blight prediction too extreme ({blight_conf*100:.1f}%). This may not be a real leaf image."
+    
+    return True, "Valid leaf image"
 
 
 @app.route("/api/predict", methods=["POST"])
@@ -103,8 +131,23 @@ def predict():
 
     try:
         image_bytes = file.read()
-        tensor = preprocess(image_bytes)
+        tensor, pil_img = preprocess(image_bytes)
         preds = model.predict(tensor, verbose=0)[0]  # (3,)
+
+        # ── Multi-layer validation ──
+        is_valid, validation_msg = validate_leaf_image(preds)
+        if not is_valid:
+            return jsonify({
+                "class": "unknown",
+                "label": "Invalid Image",
+                "confidence": 0.0,
+                "status": "rejected",
+                "error": validation_msg,
+                "all_predictions": {
+                    CLASS_NAMES[i]: round(float(preds[i]) * 100, 1)
+                    for i in range(len(CLASS_NAMES))
+                },
+            }), 400
 
         top_idx = int(np.argmax(preds))
         class_key = CLASS_NAMES[top_idx]

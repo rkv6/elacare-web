@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Brain, AlertTriangle, CheckCircle, Clock, Zap, Sparkles } from 'lucide-react';
-import { generateRemedyHybrid } from '../services/geminiServiceAccount';
+import { generateRemedyFromBackend } from '../services/backendAIService';
 
 export default function AIMonitor({ sensorData }) {
   const [analysis, setAnalysis] = useState(null);
@@ -17,7 +17,7 @@ export default function AIMonitor({ sensorData }) {
     setLoading(true);
     setError(null);
     try {
-      const result = await generateRemedyHybrid({
+      const result = await generateRemedyFromBackend({
         nitrogen: sensorData.nitrogen,
         ph: sensorData.ph,
         boron: sensorData.boron
@@ -27,7 +27,7 @@ export default function AIMonitor({ sensorData }) {
         setAnalysis(parsed);
         setLastUpdate(new Date());
       } else {
-        setError(result.remedy);
+        setError(result.remedy || 'Analysis failed');
       }
     } catch (err) {
       const errorMsg = err.message || err.toString();
