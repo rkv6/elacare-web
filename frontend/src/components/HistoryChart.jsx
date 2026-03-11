@@ -39,6 +39,31 @@ export default function HistoryChart({ data = [] }) {
 
   const chartData = data && data.length > 0 ? data : generateDefaultData();
 
+  // Custom Tooltip to show correct values - extract from each payload entry
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length > 0) {
+      // Create object from all payload entries
+      const values = {};
+      payload.forEach(entry => {
+        values[entry.dataKey] = entry.value;
+      });
+      
+      return (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-lg min-w-max">
+          <p className="text-xs font-semibold text-gray-500 uppercase mb-2 pb-2 border-b border-gray-200">{label}</p>
+          <div className="space-y-1">
+            <p className="text-sm font-medium"><span className="text-gray-700">N:</span> <span className="font-bold text-emerald-600">{(values.nitrogen !== undefined ? values.nitrogen : 0).toFixed(2)}</span></p>
+            <p className="text-sm font-medium"><span className="text-gray-700">P:</span> <span className="font-bold text-blue-600">{(values.phosphorus !== undefined ? values.phosphorus : 0).toFixed(2)}</span></p>
+            <p className="text-sm font-medium"><span className="text-gray-700">K:</span> <span className="font-bold text-purple-600">{(values.potassium !== undefined ? values.potassium : 0).toFixed(2)}</span></p>
+            <p className="text-sm font-medium"><span className="text-gray-700">pH:</span> <span className="font-bold text-amber-600">{(values.ph !== undefined ? values.ph : 0).toFixed(2)}</span></p>
+            <p className="text-sm font-medium"><span className="text-gray-700">B:</span> <span className="font-bold text-orange-600">{(values.boron !== undefined ? values.boron : 0).toFixed(2)}</span></p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bento-card">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-3">
@@ -74,7 +99,7 @@ export default function HistoryChart({ data = [] }) {
         {chartType === 'line' ? (
           <LineChart
             data={chartData}
-            margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
+            margin={{ top: 10, right: 30, left: -10, bottom: 10 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis 
@@ -83,23 +108,24 @@ export default function HistoryChart({ data = [] }) {
               style={{ fontSize: '12px', fontWeight: '500' }}
             />
             <YAxis 
+              yAxisId="left"
               stroke="#6b7280"
               style={{ fontSize: '12px', fontWeight: '500' }}
             />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-              }}
-              formatter={(value) => value.toFixed(2)}
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              stroke="#6b7280"
+              style={{ fontSize: '12px', fontWeight: '500' }}
+              domain={[0, 14]}
             />
+            <Tooltip content={<CustomTooltip />} />
             <Legend 
               wrapperStyle={{ paddingTop: '20px', fontWeight: '500' }}
               iconType="line"
             />
             <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="nitrogen" 
               stroke="#10b981" 
@@ -109,6 +135,7 @@ export default function HistoryChart({ data = [] }) {
               activeDot={{ r: 7 }}
             />
             <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="phosphorus" 
               stroke="#3b82f6" 
@@ -118,6 +145,7 @@ export default function HistoryChart({ data = [] }) {
               activeDot={{ r: 7 }}
             />
             <Line 
+              yAxisId="left"
               type="monotone" 
               dataKey="potassium" 
               stroke="#8b5cf6" 
@@ -127,6 +155,7 @@ export default function HistoryChart({ data = [] }) {
               activeDot={{ r: 7 }}
             />
             <Line 
+              yAxisId="right"
               type="monotone" 
               dataKey="ph" 
               stroke="#f59e0b" 
@@ -136,6 +165,7 @@ export default function HistoryChart({ data = [] }) {
               activeDot={{ r: 7 }}
             />
             <Line 
+              yAxisId="right"
               type="monotone" 
               dataKey="boron" 
               stroke="#ff4500" 
@@ -148,7 +178,7 @@ export default function HistoryChart({ data = [] }) {
         ) : (
           <BarChart
             data={chartData}
-            margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
+            margin={{ top: 10, right: 30, left: -10, bottom: 10 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis 
@@ -157,26 +187,30 @@ export default function HistoryChart({ data = [] }) {
               style={{ fontSize: '12px', fontWeight: '500' }}
             />
             <YAxis 
+              yAxisId="left"
               stroke="#6b7280"
               style={{ fontSize: '12px', fontWeight: '500' }}
             />
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              stroke="#6b7280"
+              style={{ fontSize: '12px', fontWeight: '500' }}
+              domain={[0, 14]}
+            />
             <Tooltip 
-              contentStyle={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-              }}
-              formatter={(value) => value.toFixed(2)}
+              content={<CustomTooltip />} 
+              cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+              isAnimationActive={false}
             />
             <Legend 
               wrapperStyle={{ paddingTop: '20px', fontWeight: '500' }}
             />
-            <Bar dataKey="nitrogen" fill="#10b981" name="N (mg/kg)" />
-            <Bar dataKey="phosphorus" fill="#3b82f6" name="P (mg/kg)" />
-            <Bar dataKey="potassium" fill="#8b5cf6" name="K (mg/kg)" />
-            <Bar dataKey="ph" fill="#f59e0b" name="pH" />
-            <Bar dataKey="boron" fill="#ff4500" name="B (mg/kg)" />
+            <Bar yAxisId="left" dataKey="nitrogen" fill="#10b981" name="N (mg/kg)" />
+            <Bar yAxisId="left" dataKey="phosphorus" fill="#3b82f6" name="P (mg/kg)" />
+            <Bar yAxisId="left" dataKey="potassium" fill="#8b5cf6" name="K (mg/kg)" />
+            <Bar yAxisId="right" dataKey="ph" fill="#f59e0b" name="pH" />
+            <Bar yAxisId="right" dataKey="boron" fill="#ff4500" name="B (mg/kg)" />
           </BarChart>
         )}
       </ResponsiveContainer>

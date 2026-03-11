@@ -17,8 +17,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 /* ================= ELACARE WiFi CONFIG ================= */
 const char* ssid = "neo";
-const char* password = "raspberrypi";
-const char* serverUrl = "http://10.238.154.34:5000/api/esp32/data";
+const char* password = "123456789";
+const char* serverUrl = "http://10.238.154.50:5000/api/esp32/data";
 const char* esp32ApiKey = "eGbdY0is1guIS6hxT7WPcyC5lHBjRfZ4";
 const char* farmId = "JX7O6poLC5QPZ5zY0fMCVZqUC003";
 

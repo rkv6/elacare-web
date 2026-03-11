@@ -10,8 +10,8 @@ const char* ssid = "YOUR_SSID";
 const char* password = "YOUR_PASSWORD";
 
 // Elacare Configuration
-const char* serverUrl = "http://YOUR_SERVER_IP:3001/api/esp32/data";
-const char* esp32ApiKey = "YOUR_ESP32_API_KEY";
+const char* serverUrl = "http://192.168.1.5:5000/api/esp32/data";
+const char* esp32ApiKey = "eGbdY0is1guIS6hxT7WPcyC5lHBjRfZ4";
 const char* farmId = "YOUR_FIREBASE_FARM_ID";
 
 // Sensor Pins (ADC - Analog to Digital Converter)

@@ -18,10 +18,14 @@ const validateESP32Key = (req, res, next) => {
 // Receive sensor data from ESP32
 router.post("/data", validateESP32Key, async (req, res) => {
   try {
+    console.log("🔵 [ESP32] POST /data received");
     const db = getDb();
     const { farmId, nitrogen, phosphorus, potassium, ph, boron, temperature, humidity } = req.body;
 
+    console.log(`🔵 [ESP32] farmId: ${farmId}`);
+
     if (!farmId) {
+      console.error("❌ [ESP32] farmId is missing");
       return res.status(400).json({ error: "farmId is required" });
     }
 
@@ -37,13 +41,17 @@ router.post("/data", validateESP32Key, async (req, res) => {
       timestamp: Timestamp.now(),
     };
 
+    console.log(`🔵 [ESP32] Writing to Firebase...`);
+    
     // Update current sensor data
     const sensorRef = db.collection("farms").doc(farmId).collection("sensors").doc("current");
     await sensorRef.set(sensorData, { merge: true });
+    console.log(`✅ [ESP32] Updated current sensor data for farm ${farmId}`);
 
     // Store historical data
     const historyRef = db.collection("farms").doc(farmId).collection("sensorHistory");
     await historyRef.add(sensorData);
+    console.log(`✅ [ESP32] Added historical sensor data for farm ${farmId}`);
 
     console.log(`📊 Sensor data received for farm ${farmId}:`, sensorData);
 
@@ -54,7 +62,7 @@ router.post("/data", validateESP32Key, async (req, res) => {
       timestamp: sensorData.lastUpdate,
     });
   } catch (error) {
-    console.error("Error storing sensor data:", error);
+    console.error("❌ [ESP32] Error storing sensor data:", error);
     res.status(500).json({ error: error.message });
   }
 });

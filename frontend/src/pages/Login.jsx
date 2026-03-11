@@ -100,9 +100,7 @@ export default function Login() {
               </p>
             </div>
 
-            <p className="text-[10px] text-gray-400 text-center mt-5 font-mono">
-              Demo: demo@elacare.com / password123
-            </p>
+
           </div>
         </div>
       </div>

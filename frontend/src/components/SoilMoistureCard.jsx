@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function SoilMoistureCard({ value = 65, unit = '%' }) {
+export default function SoilMoistureCard({ value = 0, unit = '%' }) {
   const getStatus = (val) => {
     if (val < 30) return { label: 'DRY', color: '#ef4444', bg: '#fef2f2', hint: 'Irrigation urgently needed' };
     if (val < 50) return { label: 'LOW', color: '#f59e0b', bg: '#fffbeb', hint: 'Schedule watering soon' };

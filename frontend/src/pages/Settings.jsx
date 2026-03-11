@@ -8,8 +8,7 @@ export default function Settings() {
     soilType: 'loam',
     notifications: true,
     emailAlerts: true,
-    smsAlerts: false,
-    geminiKey: import.meta.env.VITE_GOOGLE_AI_API_KEY || ''
+    smsAlerts: false
   });
 
   const [saved, setSaved] = useState(false);
@@ -122,17 +121,15 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* API Config */}
+              {/* System Info */}
               <div className="bento-card">
                 <div className="flex items-center gap-2 mb-6">
                   <Key size={16} className="text-emerald-600" />
-                  <p className="section-label">API Configuration</p>
+                  <p className="section-label">System Configuration</p>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">Google Gemini API Key</label>
-                  <input type="password" placeholder="Enter your API key" value={settings.geminiKey}
-                    onChange={(e) => handleChange('geminiKey', e.target.value)} className={inputClass} />
-                  <p className="text-[11px] text-gray-400 mt-1.5 font-mono">Get your key from Google Cloud Console</p>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                  <p className="text-sm text-emerald-900 font-medium">✅ AI Services Enabled</p>
+                  <p className="text-xs text-emerald-600 mt-1">Gemini AI is configured on the backend for secure analysis</p>
                 </div>
               </div>
 

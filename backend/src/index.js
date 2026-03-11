@@ -16,10 +16,26 @@ admin.initializeApp({
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Middleware - Explicit CORS configuration
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} from ${req.ip || req.socket.remoteAddress}`);  next();
+});
 
 // Health check
 app.get("/health", (req, res) => {
@@ -43,9 +59,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Elacare Backend running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`📡 Network accessible at: http://192.168.1.5:${PORT}`);
+const PORT = process.env.PORT || 5000;
+
+const server = app.listen(PORT, () => {
+  console.log(`\n✅ Elacare Backend initialized`);
+  console.log(`🚀 Server listening on port ${PORT}`);
+  console.log(`📊 Local: http://localhost:${PORT}/health`);
+  console.log(`📡 Check your actual IP with: ipconfig /all\n`);
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 
-export default function pHGauge({ value = 6.8 }) {
+export default function pHGauge({ value = 0 }) {
   // pH range: 0-14, optimal for most crops: 6.0-7.5
   const percentage = (value / 14) * 100;
 

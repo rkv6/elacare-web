@@ -10,8 +10,8 @@ function getWorkingModel() {
   } catch (error) {
     console.error('Error reading working model:', error);
   }
-  // Try common working models in order of preference
-  return "gemini-1.5-pro";
+  // Use the most reliable available model
+  return "gemini-2.5-flash";
 }
 
 // Clear saved model when API key changes
@@ -24,8 +24,8 @@ function clearSavedModel() {
   }
 }
 
-// Fallback models to try if primary fails (same as working test)
-const FALLBACK_MODELS = ["gemini-pro", "gemini-1.5-pro", "gemini-1.0-pro", "models/gemini-pro", "models/gemini-1.5-pro"];
+// Fallback models to try if primary fails (use models that actually exist)
+const FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-2.0-flash-001", "gemini-flash-latest"];
 
 async function tryGenerateWithFallback(genAI, prompt) {
   // First try to discover available models like the working test did

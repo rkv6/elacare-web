@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function BoronCard({ value = 2.2, unit = 'mg/kg' }) {
+export default function BoronCard({ value = 0, unit = 'mg/kg' }) {
   const getStatus = (val) => {
     if (val < 1.0) return { label: 'DEFICIENT', color: '#ef4444', bg: '#fef2f2', hint: 'Critical boron deficiency' };
     if (val < 1.5) return { label: 'LOW', color: '#f59e0b', bg: '#fffbeb', hint: 'Monitor closely' };
