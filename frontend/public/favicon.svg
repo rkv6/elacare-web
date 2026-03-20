@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background -->
+  <circle cx="50" cy="50" r="48" fill="#10b981" opacity="0.1"/>
+  
+  <!-- Leaf shape representing farming/growth -->
+  <path d="M 50 20 Q 70 35 75 55 Q 70 70 50 80 Q 30 70 25 55 Q 30 35 50 20" fill="#10b981" stroke="#059669" stroke-width="1.5"/>
+  
+  <!-- Leaf vein detail -->
+  <path d="M 50 20 Q 50 50 50 80" stroke="#059669" stroke-width="1" opacity="0.6"/>
+  
+  <!-- Smaller accent leaf -->
+  <path d="M 65 50 Q 75 55 80 65 Q 75 72 65 70 Q 60 65 65 50" fill="#34d399" opacity="0.8" stroke="#10b981" stroke-width="1"/>
+  
+  <!-- Accent circle for soil/earth -->
+  <circle cx="50" cy="85" r="6" fill="#92400e" opacity="0.7"/>
+</svg>
